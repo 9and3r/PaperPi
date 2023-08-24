@@ -13,3 +13,4 @@ tmp/*
 version.txt
 paperpi/plugins/*/library
 *.pyc
+*.DS_Store
