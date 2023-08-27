@@ -1,0 +1,272 @@
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spotify Now Playing Plugin</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <style>
+      .sector {
+        border: solid 1px #495057;
+        border-radius: 1rem;
+        margin-bottom: 3rem;
+      }
+
+      .sector .header {
+        font-size: 1.5rem;
+        padding: 1.2rem;
+        border-bottom: solid 1px #495057;
+      }
+
+      .sector .body {
+        padding: 1.2rem;
+      }
+
+      p {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      code {
+        display: inline-block;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: #495057;
+        border-radius: 1rem;
+        color: white;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="max-width: 800px; margin: 3rem auto">
+      <h1>Spotify Now Playing</h1>
+      <h3>Almost there...</h3>
+      <p>
+        The Spotify Now Playing needs a little bit of configuration so that it
+        works. This is required so the plugin has access to check your current
+        playing song.
+      </p>
+
+      <div class="sector" id="step-1">
+        <div class="header">
+          1 - Create app on the Spotify developer Dashboard and copy data
+        </div>
+        <div class="body">
+          <h3>Create the app on Spotify developer dashboard</h3>
+          <p>
+            Go to
+            <a href="https://developer.spotify.com/dashboard" target="_blank"
+              >Spotify developer dashboard</a
+            >, sign in with your Spotify account and press on the button "Create
+            App". It will ask the following data:
+          </p>
+          <ul>
+            <li><strong>App name</strong>: You can set whatever you like</li>
+            <li>
+              <strong>App description</strong>: You can set whatever you like
+            </li>
+            <li><strong>Website</strong>: Can be empty</li>
+            <li>
+              <strong>Redirect URI</strong>: Must be the following url
+              <input
+                type="text"
+                class="form-control"
+                id="redirect_uri"
+                aria-describedby="redirect_uri"
+                readonly="true"
+                value=""
+              />
+            </li>
+          </ul>
+          <h3>Copy data to PaperPi config</h3>
+          <p>
+            <img style="width: 100%" src="/settings_spotify_dashboard.png" />
+            Now you must press settings. You must get two strings from there and
+            copy over to the plugin configuration. Client ID will be visible by
+            default and you can check the Client Secret clicking on the link
+            "View client secret". You must paste them on the PaperPi
+            configuration on the Spotify Now Playing plugin section. Once you
+            have done that restart PaperPi so it detects the new values and come
+            back here.
+          </p>
+          <code>
+            client_id = YOUR_CLIENT_ID<br />client_secret = YOUR_CLIENT_SECRET
+          </code>
+          <p>
+            As a way to help you debug this are the current values in config
+            (Some values are shown with '*' for security reasons):
+          </p>
+          <label>Client ID</label>
+          <input
+            type="text"
+            class="form-control"
+            id="client_id"
+            aria-describedby="client_id"
+            readonly="true"
+            value=""
+          />
+          <p style="margin-top: 1rem">
+            <label>Client Secret</label>
+            <input
+              type="text"
+              class="form-control"
+              id="client_secret"
+              aria-describedby="client_secret"
+              readonly="true"
+              value=""
+            />
+          </p>
+        </div>
+      </div>
+
+      <div class="sector" id="step-2">
+        <div class="header">2 - Sign in on your Spotify account</div>
+        <div class="body">
+          <p>
+            Use the following button and sign to your spotify account. You will
+            need to give permissions to the plugin to check your playing status
+            and data. You will be redirected here after.
+          </p>
+          <a id="login-button" class="btn btn-primary" href="/login"
+            >Login with Spotify</a
+          >
+        </div>
+      </div>
+
+      <div class="sector" id="step-3">
+        <div class="header">3 - Make it permanent</div>
+        <div class="body">
+          <div class="alert alert-warning" role="alert">
+            The plugin could be already working but you must complete this step
+            so that the configuration is saved when you restart PaperPi.
+          </div>
+          <div>
+            You must copy the refresh_token to the plugin config (Note: For
+            security reasons refresh_token is shown only once after login. If it
+            is empty go to step 2 and try again):
+          </div>
+          <code> refresh_token = <span id="refresh_token"></span> </code>
+          <div
+            id="playing_container_no_track"
+            class="alert alert-success"
+            role="alert"
+          >
+            It works! But it seems you are not listenging to anything on Spotify
+            yet. Give it a try! Get some song playing on Spotify in any device
+            to fully test it. No need to reload. This page will detect your
+            playing a song on Spotify.
+          </div>
+          <div id="playing_container" class="alert alert-success" role="alert">
+            It works! It seems that youre listening to
+            <span id="artist-span"></span>.
+            <div
+              style="
+                display: flex;
+                margin-top: 2rem;
+                justify-content: center;
+                align-items: center;
+                gap: 3rem;
+              "
+            >
+              <img id="album-art" style="width: 30%" />
+              <div style="width: 30%; font-size: 1.3rem; color: white">
+                <div id="track_name"></div>
+                <div id="album"></div>
+                <div id="artist"></div>
+                <div id="device" style="font-size: 0.8rem"></div>
+              </div>
+            </div>
+          </div>
+
+          <p>
+            It is recomended to disable the server once the configuration is
+            done correctly. For that, change the parameter 'start_server' to
+            False:
+          </p>
+          <code>start_server = False </code>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      let currentStep = null;
+      let redirect_uri =
+        window.location.protocol + "//" + window.location.host + "/callback";
+      document.getElementById("redirect_uri").value = redirect_uri;
+      document.getElementById("login-button").href =
+        "login?redirect_uri=" + redirect_uri;
+
+      var url = new URL(window.location.href);
+      var refresh_token = url.searchParams.get("refresh_token");
+      document.getElementById("refresh_token").innerHTML = refresh_token;
+
+      const checkStatus = async () => {
+        try {
+          let response = await fetch("/status?redirect_uri=" + redirect_uri);
+          console.log(response);
+          let data = await response.json();
+          console.log(data);
+
+          document.getElementById("client_id").value = data.client_id;
+          document.getElementById("client_secret").value = data.client_secret;
+
+          let playingContainer = document.getElementById("playing_container");
+          let playingContainerNoTrack = document.getElementById(
+            "playing_container_no_track"
+          );
+
+          if (data.playing_data_response_ok) {
+            if (data.playing_data === null) {
+              playingContainer.style.display = "none";
+              playingContainerNoTrack.style.display = "block";
+            } else {
+              document.getElementById("album-art").src =
+                data.playing_data.item.album.images[0].url;
+              document.getElementById("artist").innerHTML =
+                data.playing_data.item.artists[0].name;
+              document.getElementById("track_name").innerHTML =
+                data.playing_data.item.name;
+              document.getElementById("album").innerHTML =
+                data.playing_data.item.album.name;
+              document.getElementById("artist-span").innerHTML =
+                data.playing_data.item.artists[0].name;
+              document.getElementById("device").innerHTML =
+                data.playing_data.device.name;
+              playingContainer.style.display = "block";
+              playingContainerNoTrack.style.display = "none";
+            }
+          } else {
+            playingContainer.style.display = "none";
+            playingContainerNoTrack.style.display = "none";
+          }
+
+          newStep = 0;
+          if (data.playing_data_response_ok) {
+            newStep = 3;
+          } else if (data.response_code_authorize === 200) {
+            newStep = 2;
+          }
+          if (currentStep != newStep && newStep > 0) {
+            currentStep = newStep;
+            document.getElementById("step-" + newStep).scrollIntoView();
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        setTimeout(checkStatus, 5000);
+      };
+      checkStatus();
+    </script>
+  </body>
+</html>

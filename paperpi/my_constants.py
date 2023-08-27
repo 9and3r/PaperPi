@@ -43,4 +43,4 @@ Version: {VERSION}
 '''
 
 # sleep delay in the update loop in seconds
-UPDATE_SLEEP = 5
+UPDATE_SLEEP = 1

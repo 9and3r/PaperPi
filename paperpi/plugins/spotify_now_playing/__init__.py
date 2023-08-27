@@ -1,0 +1,1 @@
+from .spotify_now_playing import update_function
