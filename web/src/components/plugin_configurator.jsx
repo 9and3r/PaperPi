@@ -17,10 +17,6 @@ const PluginConfigurator = (props) => {
 
   useEffect(() => {
     const loadLayouts = async () => {
-      let response = await fetch(
-        "http://localhost:4000/endpoints/plugins/" + plugin.plugin + "/layouts"
-      );
-      let data = await response.json();
       setLayouts(data);
     };
     if (plugin) {
