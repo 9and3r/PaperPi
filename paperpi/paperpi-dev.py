@@ -41,7 +41,7 @@ from library.InterruptHandler import InterruptHandler
 from library import get_help
 from library import run_module
 import my_constants as constants
-
+from server import startServer
 
 
 
@@ -701,6 +701,8 @@ def main():
     logging.info('configured')
             
     splash = setup_splash(config, screen.resolution)
+
+    startServer()
     
     if splash:
         splash_kwargs = {
