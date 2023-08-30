@@ -13,7 +13,8 @@ URL = 'https://github.com/ txoof/PaperPi'
 
 
 
-CONFIG_FILENAME = f'{APP_NAME.lower()}.ini'
+#CONFIG_FILENAME = f'{APP_NAME.lower()}.ini'
+CONFIG_FILENAME = f'{APP_NAME.lower()}_cfg.json'
 
 
 # reliably identify the current working directory
