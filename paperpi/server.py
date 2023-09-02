@@ -17,12 +17,35 @@ def index():
         return _build_cors_preflight_response()
     return sendResponse(jsonify({"a":"b"}))
 
+@app.route('/endpoints/config', methods=['GET', 'POST', 'OPTIONS'])
+def config():
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        newConfig = request.json
+        # TODO SAVE THE NEW CONFIG. COMPARE AND RELOAD REQUIRED PLUGINS
+        print("Testing. NewConfig received")
+        print(newConfig)
+        return sendResponse(jsonify(newConfig))
+
+    config = {'main':{}, 'plugins':{}}
+    return sendResponse(jsonify(config))
+    
+
 @app.route('/endpoints/plugins/list')
 def plugins():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     plugins = get_help._get_modules(root=Path(constants.BASE_DIRECTORY)/'plugins')
-    return sendResponse(jsonify(plugins))
+    result = {'loaded':[], 'error': []}
+    for pluginName in plugins:
+        print("Loading: " + pluginName)
+        try:
+            imported = importlib.import_module(pluginName)
+            result['loaded'].append({'name': pluginName, 'version': imported.constants.version})
+        except:
+            result['error'].append({'name': pluginName})
+    return sendResponse(jsonify(result))
 
 @app.route('/endpoints/plugins/<plugin>/layouts')
 def pluginLayouts(plugin):
@@ -53,7 +76,7 @@ def serveImage(pil_img):
 def _build_cors_preflight_response(response = None):
     if response is None:
         response = make_response()
-    response.headers.add("Access-Control-Allow-Origin", "http://localhost:3000")
+    response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add('Access-Control-Allow-Headers', "*")
     response.headers.add('Access-Control-Allow-Methods', "*")
     return response

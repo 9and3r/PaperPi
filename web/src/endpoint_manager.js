@@ -6,11 +6,27 @@ const loadPlugins = async () => {
 };
 
 const getConfig = async () => {
-  let fakeConfig = {
-    main: { display_type: "HD", screen_mode: "L" },
-    plugins: {},
-  };
-  return Promise.resolve(fakeConfig);
+  let response = await fetch(ENDPOINTS_HOST + "/endpoints/config");
+  return await response.json();
 };
 
-export { loadPlugins, getConfig };
+const getLayouts = async (plugin) => {
+  let response = await fetch(
+    ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/layouts"
+  );
+  return await response.json();
+};
+
+const sendConfig = async (config) => {
+  let response = await fetch(ENDPOINTS_HOST + "/endpoints/config", {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(config),
+  });
+  return await response.json();
+};
+
+export { loadPlugins, getConfig, getLayouts, sendConfig };
