@@ -10,9 +10,9 @@ const getConfig = async () => {
   return await response.json();
 };
 
-const getLayouts = async (plugin) => {
+const getPluginConfig = async (plugin) => {
   let response = await fetch(
-    ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/layouts"
+    ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/info"
   );
   return await response.json();
 };
@@ -29,4 +29,30 @@ const sendConfig = async (config) => {
   return await response.json();
 };
 
-export { loadPlugins, getConfig, getLayouts, sendConfig };
+const testPlugin = async (plugin, config) => {
+  let response = await fetch(
+    ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/test",
+    {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(config),
+    }
+  );
+  return URL.createObjectURL(await response.blob());
+};
+
+const getPluginSampleImageUrl = (plugin) => {
+  return ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/sample_image";
+};
+
+export {
+  loadPlugins,
+  getConfig,
+  getPluginConfig,
+  sendConfig,
+  testPlugin,
+  getPluginSampleImageUrl,
+};

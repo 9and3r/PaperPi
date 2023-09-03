@@ -180,8 +180,8 @@ class Plugin:
                 self.hash'''        
         if self._is_ready() or force:
             logging.info(f'starting update - timeout: {self.plugin_timeout} sec')
-            signal.signal(signal.SIGALRM, self._alarm_handler)
-            signal.alarm(self.plugin_timeout)
+            #signal.signal(signal.SIGALRM, self._alarm_handler)
+            #signal.alarm(self.plugin_timeout)
             try:
                 is_updated, data, priority = self.update_function(*args, **kwargs)
             except TimeOutException as e:

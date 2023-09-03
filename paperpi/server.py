@@ -1,5 +1,5 @@
 import json
-from flask import Flask, jsonify, make_response, request, send_file
+from flask import Flask, jsonify, make_response, request, send_file, render_template
 from threading import Thread
 from dataclasses_json import dataclass_json
 from io import BytesIO
@@ -8,14 +8,22 @@ from library import get_help
 import my_constants as constants
 from pathlib import Path
 import importlib
+import copy
+import logging
+from library.CacheFiles import CacheFiles
+from importlib import import_module
+import traceback
 
-app = Flask(__name__)
+
+from library.Plugin import Plugin
+
+app = Flask(__name__, static_url_path="", static_folder="web", template_folder="web")
+
+logger = logging.getLogger(__name__)
 
 @app.route('/')
 def index():
-    if request.method == "OPTIONS":
-        return _build_cors_preflight_response()
-    return sendResponse(jsonify({"a":"b"}))
+    return render_template('index.html')
 
 @app.route('/endpoints/config', methods=['GET', 'POST', 'OPTIONS'])
 def config():
@@ -30,6 +38,26 @@ def config():
 
     config = {'main':{}, 'plugins':{}}
     return sendResponse(jsonify(config))
+
+@app.route('/endpoints/plugins/<plugin>/test', methods=['POST', 'OPTIONS'])
+def testPlugin(plugin):
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    print("Loading pluing: " + plugin)
+    try:
+        image = setupPlugin(plugin, request.json)
+    except:
+        traceback.print_exc()
+    print(type(image))
+    return serveImage(image)
+
+@app.route('/endpoints/plugins/<plugin>/sample_image')
+def getSampleImage(plugin):
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    file = constants.BASE_DIRECTORY + '/plugins/' + plugin + "/" + plugin +".layout-L-sample.png"
+    print(file)
+    return send_file(file)
     
 
 @app.route('/endpoints/plugins/list')
@@ -47,14 +75,41 @@ def plugins():
             result['error'].append({'name': pluginName})
     return sendResponse(jsonify(result))
 
-@app.route('/endpoints/plugins/<plugin>/layouts')
+@app.route('/endpoints/plugins/<plugin>/info')
 def pluginLayouts(plugin):
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
-    print(plugin)
     imported = importlib.import_module(plugin)
+    config = copy.deepcopy(imported.constants.json_config)
     layouts = get_help._get_layouts(imported, arrayMode=True)
-    return sendResponse(jsonify(layouts))
+    print(config)
+    for key in config:
+        if key == 'layout':
+            # Set layouts on config
+            config[key] = {"description": "", 'value': config[key], 'choice': layouts, 'system_required': True}
+        elif key == 'plugin':
+            config[key] = {"description": "Plugin to use", 'value': config[key], 'type': 'string', 'system_required': True}
+        elif key == 'refresh_rate':
+            config[key] = {"description": "Max refresh time in seconds", 'value': config[key], 'type': 'int', 'system_required': True}
+        elif key == 'min_display_time':
+            config[key] = {"description": "Min time that the plugin should be displayed in seconds", 'value': config[key], 'type': 'int', 'system_required': True}
+        elif key == 'max_priority':
+            config[key] = {"description": "Max priority of the plugin", 'value': config[key], 'type': 'int', 'system_required': True}
+        else:
+            # Check if type is a simple string
+            if isinstance(config[key], str):
+                config[key] = {"description": "", 'value': config[key], 'type': 'string'}
+            # Check type is defined. By default we asumme is a string
+            elif not 'type' in config[key]:
+                config[key]['type'] = 'string'
+
+
+    # Set enabled
+    config['enabled'] = {"description": "If false. This plugin will not be used", 'type': 'bool', 'value': True, 'system_required': True}
+    response = {'version': imported.constants.version, 'config': config}
+    
+
+    return sendResponse(jsonify(response))
 
 def startServer():
     t = Thread(target=runServer)
@@ -84,3 +139,60 @@ def _build_cors_preflight_response(response = None):
 def _corsify_actual_response(response):
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
+# Has been copied. Should be improved in the future to reuse code
+def setupPlugin(key, values):
+
+    def font_path(layout):
+        '''add font path to layout'''
+        for k, block in layout.items():
+            font = block.get('font', None)
+            if font:
+                font = font.format(constants.FONTS)
+                block['font'] = font
+        return layout
+
+    cache = CacheFiles(path_prefix=constants.APP_NAME)
+    plugin_config = {}
+    # populate the kwargs plugin_config dict that will be passed to the Plugin() object
+    plugin_config['name'] = key
+    plugin_config['resolution'] = (800, 600)
+    plugin_config['config'] = values
+    plugin_config['cache'] = cache
+    plugin_config['force_onebit'] = False #config['main']['force_onebit']
+    plugin_config['screen_mode'] = 'RGB' #config['main']['screen_mode']
+    plugin_config['plugin_timeout'] = 35
+            # force layout to one-bit mode for non-HD screens
+#             if not config['main'].get('display_type') == 'HD':
+#                 plugin_config['force_onebit'] = True
+
+    logging.debug(f'plugin_config: {plugin_config}')
+    
+    try:
+        module = import_module(f'{constants.PLUGINS}.{values["plugin"]}')
+        plugin_config['update_function'] = module.update_function
+        layout = getattr(module.layout, values['layout'])
+        layout = font_path(layout)
+        plugin_config['layout'] = layout
+    except KeyError as e:
+        logger.info('no module specified; skipping update_function and layout')
+    except ModuleNotFoundError as e:
+        logger.warning(f'error: {e} while loading module {constants.PLUGINS}.{values["plugin"]}')
+        logger.warning(f'skipping plugin')
+
+    except AttributeError as e:
+        logger.warning(f'could not find layout "{plugin_config["layout"]}" in {plugin_config["name"]}')
+        logger.warning(f'skipping plugin')
+
+    my_plugin = Plugin(**plugin_config)
+    try:
+        my_plugin.update()
+    except AttributeError as e:
+        logger.warning(f'ignoring plugin {my_plugin.name} due to missing update_function')
+        logger.warning(f'plugin threw error: {e}')
+ 
+    logger.info(f'appending plugin {my_plugin.name}')
+
+    my_plugin.update()
+    print("Getting image")
+    return my_plugin.image

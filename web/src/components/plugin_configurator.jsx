@@ -1,24 +1,19 @@
 import {
+  Box,
   Button,
   Card,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
+  CircularProgress,
+  Dialog,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
-  TextField,
-  Tooltip,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import { getLayouts } from "../endpoint_manager";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import { useEffect, useState } from "react";
+import { getPluginConfig, sendConfig, testPlugin } from "../endpoint_manager";
 import EditIcon from "@mui/icons-material/Edit";
 import ChangePluginName from "./change_plugin_name";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BasicDialog from "./basic_dialog";
+import DynamicOption from "./dynamic_option";
 
 const PluginConfigurator = (props) => {
   const {
@@ -29,19 +24,33 @@ const PluginConfigurator = (props) => {
     updatePluginKey,
     onDelete,
   } = props;
-  const [layouts, setLayouts] = useState([]);
+
+  const [pluginConfig, setPluginConfig] = useState(null);
+  const [orderedOptions, setOrderedOptions] = useState([]);
   const [nameEditDialogOpen, setNameEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [image, setImage] = useState(null);
 
   const pluginName = plugin ? plugin.plugin : null;
 
   useEffect(() => {
-    const loadLayouts = async () => {
-      setLayouts(await getLayouts(pluginName));
+    const loadPluginConfig = async () => {
+      let response = await getPluginConfig(pluginName);
+      setPluginConfig(response);
+      let ordered = Object.entries(response.config).sort((a1, a2) => {
+        let a1SystemPriority = "system_required" in a1[1] && a1[1] ? -1 : 1;
+        let a2SystemPriority = "system_required" in a2[1] && a2[1] ? -1 : 1;
+        if (a1SystemPriority === a2SystemPriority) {
+          return a1[0].localeCompare(a2[0]);
+        }
+        return a1SystemPriority - a2SystemPriority;
+      });
+      setOrderedOptions(ordered);
     };
     if (pluginName) {
-      setLayouts([]);
-      loadLayouts();
+      setPluginConfig([]);
+      setOrderedOptions([]);
+      loadPluginConfig();
     }
   }, [pluginName]);
 
@@ -77,7 +86,13 @@ const PluginConfigurator = (props) => {
           updatePluginKey(oldKey, newKey);
         }}
       />
-      <Card sx={{ padding: "1rem" }}>
+
+      <Card
+        sx={{
+          padding: "1rem",
+          paddingTop: 0,
+        }}
+      >
         <Stack
           direction="row"
           gap={1}
@@ -103,81 +118,27 @@ const PluginConfigurator = (props) => {
           >
             Delete
           </Button>
+          <Button
+            onClick={async () => {
+              setImage(-1);
+              setImage(await testPlugin(plugin.plugin, plugin));
+            }}
+          >
+            Preview
+          </Button>
         </Stack>
         <Stack gap={3}>
-          {plugin
-            ? Object.entries(plugin).map(([key, value]) => {
-                if (key === "enabled") {
-                  return (
-                    <Stack direction="row" alignItems="center" key={key}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={value}
-                            onChange={(event) => {
-                              setNewValue(key, event.target.checked);
-                            }}
-                          />
-                        }
-                        label={key}
-                      />
-                      {value ? null : (
-                        <Tooltip title="This plugin is not enabled">
-                          <WarningAmberIcon color="warning" />
-                        </Tooltip>
-                      )}
-                    </Stack>
-                  );
-                }
-
-                if (typeof value === "boolean") {
-                  return (
-                    <FormControlLabel
-                      key={key}
-                      control={
-                        <Checkbox
-                          checked={value}
-                          onChange={(event) => {
-                            setNewValue(key, event.target.checked);
-                          }}
-                        />
-                      }
-                      label={key}
-                    />
-                  );
-                }
-
-                if (key === "layout") {
-                  return (
-                    <FormControl fullWidth key={key}>
-                      <InputLabel>{key}</InputLabel>
-                      <Select
-                        value={layouts.indexOf(value) >= 0 ? value : ""}
-                        label={key}
-                        onChange={(event) =>
-                          setNewValue(key, event.target.value)
-                        }
-                      >
-                        {layouts.map((item) => {
-                          return (
-                            <MenuItem key={item} value={item}>
-                              {item}
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-                  );
-                }
-
+          {pluginConfig && plugin && pluginConfig.config
+            ? orderedOptions.map(([key, value]) => {
                 return (
-                  <TextField
+                  <DynamicOption
                     key={key}
-                    label={key}
-                    value={value}
+                    value={plugin[key]}
                     disabled={key === "plugin"}
-                    onChange={(event) => {
-                      setNewValue(key, event.target.value);
+                    option={value}
+                    label={key}
+                    onChange={(newValue) => {
+                      setNewValue(key, newValue);
                     }}
                   />
                 );
@@ -185,6 +146,22 @@ const PluginConfigurator = (props) => {
             : null}
         </Stack>
       </Card>
+      {image ? (
+        <Dialog open={true} onClose={() => setImage(null)}>
+          <Card>
+            <Stack gap={2} sx={{ margin: "2rem", marginBottom: "1rem" }}>
+              {image === -1 ? (
+                <CircularProgress />
+              ) : (
+                <>
+                  <img src={image} alt="Preview" />{" "}
+                  <Button onClick={() => setImage(null)}>Close preview</Button>
+                </>
+              )}
+            </Stack>
+          </Card>
+        </Dialog>
+      ) : null}
     </>
   );
 };

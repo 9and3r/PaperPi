@@ -1,19 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "@mui/material/Button";
-import { Card, Divider, IconButton, Stack } from "@mui/material";
+import { Card, Dialog, Divider, IconButton, Slide, Stack } from "@mui/material";
 import PluginConfigurator from "./plugin_configurator";
-import { getConfig, loadPlugins, sendConfig } from "../endpoint_manager";
+import { ReactComponent as Logo } from "../PaperPi.svg";
+import {
+  getConfig,
+  getPluginConfig,
+  loadPlugins,
+  sendConfig,
+} from "../endpoint_manager";
 import AddNewPlugin from "./add_new_plugin";
 import AddIcon from "@mui/icons-material/Add";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import SaveIcon from "@mui/icons-material/Save";
 import BasicDialog from "./basic_dialog";
+import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 
 const Main = () => {
   const [availablePlugins, setAvailablePlugins] = useState(null);
   const [selectedPlugin, setSelectedPlugin] = useState(null);
   const [config, setConfig] = useState(null);
   const [showApplyChangesDialog, setShowApplyChangesDialog] = useState(false);
+  const [showJson, setShowJson] = useState(null);
 
   const [newPluginDialogOpen, setNewPluginDialogOpen] = useState(false);
 
@@ -23,9 +31,10 @@ const Main = () => {
       setConfig(await getConfig());
     };
     initialLoad();
+    setShowJson(localStorage.getItem("showJson"));
   }, []);
 
-  const onAddPlugin = (item) => {
+  const onAddPlugin = async (item) => {
     let newConfig = { ...config };
     // Find available name
     let num = 0;
@@ -40,14 +49,11 @@ const Main = () => {
       name = humanName + " " + num;
     }
 
-    newConfig.plugins[name] = {
-      plugin: item,
-      enabled: true,
-      layout: "layout",
-      refresh_rate: 30,
-      min_display_time: 60,
-      max_priority: 2000,
-    };
+    let pluginConfig = await getPluginConfig(item);
+    newConfig.plugins[name] = {};
+    Object.entries(pluginConfig.config).forEach(([key, item]) => {
+      newConfig.plugins[name][key] = item.value;
+    });
     setConfig(newConfig);
     setNewPluginDialogOpen(false);
     setSelectedPlugin(name);
@@ -80,6 +86,20 @@ const Main = () => {
 
   return (
     <>
+      <IconButton
+        sx={{
+          zIndex: 1000,
+          position: "fixed",
+          bottom: "0.5rem",
+          right: "0.5rem",
+        }}
+        onClick={() => {
+          localStorage.setItem("showJson", !showJson);
+          setShowJson(!showJson);
+        }}
+      >
+        <DeveloperModeIcon />
+      </IconButton>
       <BasicDialog
         open={showApplyChangesDialog}
         title="Apply changes?"
@@ -93,7 +113,7 @@ const Main = () => {
         }}
         acceptButtonLabel="Apply changes"
       />
-      <div style={{ margin: "3rem" }}>
+      <div style={{ margin: "3rem", marginTop: 0 }}>
         <AddNewPlugin
           availablePlugins={availablePlugins}
           open={newPluginDialogOpen}
@@ -108,6 +128,7 @@ const Main = () => {
           alignItems="center"
         >
           <h1>PaperPi</h1>
+          <Logo style={{ width: "3rem" }} />
           <Button
             onClick={() => setShowApplyChangesDialog(true)}
             endIcon={<SaveIcon />}
@@ -115,7 +136,12 @@ const Main = () => {
             Apply changes
           </Button>
         </Stack>
-        <Stack direction="row" justifyContent="space-between" gap={3}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          gap={3}
+          alignItems="flex-start"
+        >
           <Card sx={{ padding: "1rem", minWidth: "15rem", paddingTop: 0 }}>
             <h3>Main</h3>
             <Button
@@ -184,11 +210,13 @@ const Main = () => {
               />
             ) : null}
           </div>
-          <textarea
-            style={{ width: "40%", height: "50vh" }}
-            value={JSON.stringify(config, null, 2)}
-            readOnly={true}
-          />
+          {showJson ? (
+            <textarea
+              style={{ width: "40%", height: "50vh" }}
+              value={JSON.stringify(config, null, 2)}
+              readOnly={true}
+            />
+          ) : null}
         </Stack>
       </div>
     </>
