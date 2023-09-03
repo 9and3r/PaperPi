@@ -7,7 +7,7 @@
           "value": "None"
         },
         "vcom": {
-          "description": "VCOM voltage for HD screens - see ribon cable",
+          "description": "VCOM voltage for HD screens - see ribbon cable",
           "value": 0.0,
           "type": "float"
         },
