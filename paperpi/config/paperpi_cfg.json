@@ -3,7 +3,7 @@
     "main": {
         "display_type": {
           "description": "Attached epd display; use HD for all HD screens",
-          "choice": ["can we populate this from Screen.list_compatible() ?"],
+          "choice": [],
           "value": "None"
         },
         "vcom": {
@@ -12,7 +12,7 @@
           "type": "float"
         },
         "max_refresh": {
-          "description": "Maximum partial refreshes before a full screen whipe (HD Screens only)",
+          "description": "Maximum partial refreshes before a full screen wipe (HD Screens only)",
           "value": 4,
           "type": "int"
         },
