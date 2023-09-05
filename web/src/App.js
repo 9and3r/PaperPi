@@ -14,7 +14,7 @@ function App() {
   const theme = createTheme({
     palette: {
       mode: "dark",
-      primary: primary,
+      //primary: primary,
     },
   });
 

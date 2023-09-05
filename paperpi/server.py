@@ -14,6 +14,8 @@ from library.CacheFiles import CacheFiles
 from importlib import import_module
 import traceback
 
+from epdlib import Screen
+
 
 from library.Plugin import Plugin
 
@@ -75,33 +77,52 @@ def plugins():
             result['error'].append({'name': pluginName})
     return sendResponse(jsonify(result))
 
+@app.route('/endpoints/config/main/info')
+def mainConfigInfo():
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    file = open(constants.BASE_DIRECTORY + '/config/paperpi_cfg.json')
+    data = json.load(file)
+    file.close()
+    # Load screen types
+    try:
+        screens = Screen().list_compatible()
+        screen_names = []
+        for screen in screens:
+            screen_names.append(screen.name)
+        data['main']['display_type']['choice'] = screen_names
+    except:
+        # If we are not on Raspberry Pi show fake display list
+        data['main']['display_type']['choice'] = ['pygame']
+    return sendResponse(jsonify(data))
+
 @app.route('/endpoints/plugins/<plugin>/info')
-def pluginLayouts(plugin):
+def pluginConfigInfo(plugin):
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     imported = importlib.import_module(plugin)
     config = copy.deepcopy(imported.constants.json_config)
     layouts = get_help._get_layouts(imported, arrayMode=True)
-    print(config)
+
+    # Add default system keys
+    for key in constants.REQ_PLUGIN_KEYS:
+        config[key] = constants.REQ_PLUGIN_KEYS[key]
+        config[key]['system_required'] = True
+
     for key in config:
         if key == 'layout':
             # Set layouts on config
-            config[key] = {"description": "", 'value': config[key], 'choice': layouts, 'system_required': True}
-        elif key == 'plugin':
-            config[key] = {"description": "Plugin to use", 'value': config[key], 'type': 'string', 'system_required': True}
-        elif key == 'refresh_rate':
-            config[key] = {"description": "Max refresh time in seconds", 'value': config[key], 'type': 'int', 'system_required': True}
-        elif key == 'min_display_time':
-            config[key] = {"description": "Min time that the plugin should be displayed in seconds", 'value': config[key], 'type': 'int', 'system_required': True}
-        elif key == 'max_priority':
-            config[key] = {"description": "Max priority of the plugin", 'value': config[key], 'type': 'int', 'system_required': True}
-        else:
-            # Check if type is a simple string
-            if isinstance(config[key], str):
-                config[key] = {"description": "", 'value': config[key], 'type': 'string'}
-            # Check type is defined. By default we asumme is a string
-            elif not 'type' in config[key]:
-                config[key]['type'] = 'string'
+            config[key]['choice'] = layouts
+
+        if key == 'plugin':
+            config[key]['value'] = plugin
+
+        # Check if type is a simple string
+        if isinstance(config[key], str):
+            config[key] = {"description": "", 'value': config[key], 'type': 'string'}
+        # Check type is defined. By default we asumme is a string
+        elif not 'type' in config[key]:
+            config[key]['type'] = 'string'
 
 
     # Set enabled

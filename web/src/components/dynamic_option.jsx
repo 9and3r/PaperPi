@@ -12,13 +12,15 @@ import {
 const DynamicOption = (props) => {
   const { value, label, option, onChange, disabled = false } = props;
 
+  const valueIsUndefined = typeof value === "undefined";
+
   if (option.type === "bool") {
     return (
       <FormControl fullWidth>
         <FormControlLabel
           control={
             <Checkbox
-              checked={value}
+              checked={valueIsUndefined ? false : value}
               onChange={(event) => {
                 onChange(event.target.checked);
               }}
@@ -35,7 +37,13 @@ const DynamicOption = (props) => {
       <FormControl fullWidth>
         <InputLabel>{label}</InputLabel>
         <Select
-          value={option["choice"].indexOf(value) >= 0 ? value : ""}
+          value={
+            valueIsUndefined
+              ? ""
+              : option["choice"].indexOf(value) >= 0
+              ? value
+              : ""
+          }
           label={label}
           onChange={(event) => onChange(event.target.value)}
         >
@@ -52,7 +60,7 @@ const DynamicOption = (props) => {
     );
   }
   const error =
-    option.type === "int"
+    valueIsUndefined || option.type === "int"
       ? isNaN(parseInt(value))
       : option.type === "float"
       ? isNaN(parseFloat(value))
@@ -62,7 +70,7 @@ const DynamicOption = (props) => {
   return (
     <TextField
       label={label}
-      value={value}
+      value={valueIsUndefined ? "" : value}
       type={option.type === "int" ? "number" : "text"}
       helperText={option.description}
       disabled={disabled}

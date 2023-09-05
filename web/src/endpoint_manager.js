@@ -10,7 +10,19 @@ const getConfig = async () => {
   return await response.json();
 };
 
+const getMainConfigInfo = async () => {
+  let response = await fetch(ENDPOINTS_HOST + "/endpoints/config/main/info");
+  return await response.json();
+};
+
 const getPluginConfig = async (plugin) => {
+  try {
+    // Code throwing an exception
+    throw new Error();
+  } catch (e) {
+    console.log(e.stack);
+  }
+  console.log(plugin);
   let response = await fetch(
     ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/info"
   );
@@ -55,4 +67,5 @@ export {
   sendConfig,
   testPlugin,
   getPluginSampleImageUrl,
+  getMainConfigInfo,
 };

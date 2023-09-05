@@ -4,16 +4,18 @@ import {
   Card,
   CircularProgress,
   Dialog,
+  Divider,
   IconButton,
   Stack,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { getPluginConfig, sendConfig, testPlugin } from "../endpoint_manager";
+import { getPluginConfig, testPlugin } from "../endpoint_manager";
 import EditIcon from "@mui/icons-material/Edit";
 import ChangePluginName from "./change_plugin_name";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BasicDialog from "./basic_dialog";
 import DynamicOption from "./dynamic_option";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const PluginConfigurator = (props) => {
   const {
@@ -112,13 +114,10 @@ const PluginConfigurator = (props) => {
               <EditIcon />
             </IconButton>
           </Stack>
+
           <Button
-            endIcon={<DeleteIcon />}
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            Delete
-          </Button>
-          <Button
+            variant="outlined"
+            endIcon={<VisibilityIcon />}
             onClick={async () => {
               setImage(-1);
               setImage(await testPlugin(plugin.plugin, plugin));
@@ -144,6 +143,17 @@ const PluginConfigurator = (props) => {
                 );
               })
             : null}
+        </Stack>
+        <Divider sx={{ margin: "1rem 0" }} />
+        <Stack direction="row-reverse">
+          <Button
+            variant="outlined"
+            color="error"
+            endIcon={<DeleteIcon />}
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            Delete
+          </Button>
         </Stack>
       </Card>
       {image ? (

@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "@mui/material/Button";
-import { Card, Dialog, Divider, IconButton, Slide, Stack } from "@mui/material";
+import {
+  Card,
+  Dialog,
+  Divider,
+  IconButton,
+  Slide,
+  Stack,
+  ThemeProvider,
+  Typography,
+  createTheme,
+} from "@mui/material";
 import PluginConfigurator from "./plugin_configurator";
 import { ReactComponent as Logo } from "../PaperPi.svg";
 import {
@@ -15,13 +25,22 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import SaveIcon from "@mui/icons-material/Save";
 import BasicDialog from "./basic_dialog";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
+import MainConfiguration from "./main_configuration";
 
 const Main = () => {
   const [availablePlugins, setAvailablePlugins] = useState(null);
   const [selectedPlugin, setSelectedPlugin] = useState(null);
   const [config, setConfig] = useState(null);
   const [showApplyChangesDialog, setShowApplyChangesDialog] = useState(false);
-  const [showJson, setShowJson] = useState(null);
+  const [showJson, setShowJson] = useState(
+    localStorage.getItem("showJson") === "true"
+  );
+
+  const themeLight = createTheme({
+    palette: {
+      mode: "light",
+    },
+  });
 
   const [newPluginDialogOpen, setNewPluginDialogOpen] = useState(false);
 
@@ -31,8 +50,9 @@ const Main = () => {
       setConfig(await getConfig());
     };
     initialLoad();
-    setShowJson(localStorage.getItem("showJson"));
   }, []);
+
+  console.log(showJson);
 
   const onAddPlugin = async (item) => {
     let newConfig = { ...config };
@@ -48,7 +68,6 @@ const Main = () => {
       num++;
       name = humanName + " " + num;
     }
-
     let pluginConfig = await getPluginConfig(item);
     newConfig.plugins[name] = {};
     Object.entries(pluginConfig.config).forEach(([key, item]) => {
@@ -62,6 +81,12 @@ const Main = () => {
   const updatePluginConfig = (plugin, newPluginConfig) => {
     let newConfig = { ...config };
     newConfig.plugins[plugin] = newPluginConfig;
+    setConfig(newConfig);
+  };
+
+  const updateMainConfig = (key, value) => {
+    let newConfig = { ...config };
+    newConfig.main[key] = value;
     setConfig(newConfig);
   };
 
@@ -113,7 +138,7 @@ const Main = () => {
         }}
         acceptButtonLabel="Apply changes"
       />
-      <div style={{ margin: "3rem", marginTop: 0 }}>
+      <Stack>
         <AddNewPlugin
           availablePlugins={availablePlugins}
           open={newPluginDialogOpen}
@@ -122,35 +147,56 @@ const Main = () => {
             setNewPluginDialogOpen(false);
           }}
         />
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <h1>PaperPi</h1>
-          <Logo style={{ width: "3rem" }} />
-          <Button
-            onClick={() => setShowApplyChangesDialog(true)}
-            endIcon={<SaveIcon />}
+        <ThemeProvider theme={themeLight}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{
+              position: "sticky",
+              zIndex: 5,
+              backgroundColor: "#FFFFFFFF",
+              color: "black",
+              padding: "0 3rem",
+              top: 0,
+              left: 0,
+              right: 0,
+            }}
           >
-            Apply changes
-          </Button>
-        </Stack>
+            <Stack direction="row" alignItems="center" gap={3}>
+              <Logo style={{ width: "3rem" }} />
+              <Typography variant="h4" sx={{ margin: "0.7rem 0" }}>
+                PaperPi
+              </Typography>
+            </Stack>
+
+            <Button
+              onClick={() => setShowApplyChangesDialog(true)}
+              endIcon={<SaveIcon />}
+              color="warning"
+              variant="outlined"
+            >
+              Apply changes
+            </Button>
+          </Stack>
+        </ThemeProvider>
+
         <Stack
           direction="row"
           justifyContent="space-between"
           gap={3}
+          sx={{ margin: "3rem 3rem" }}
           alignItems="flex-start"
         >
           <Card sx={{ padding: "1rem", minWidth: "15rem", paddingTop: 0 }}>
             <h3>Main</h3>
             <Button
+              sx={{ width: "100%", justifyContent: "space-between" }}
               onClick={() => setSelectedPlugin(null)}
               variant={selectedPlugin === null ? "contained" : "outlined"}
             >
-              General configuration
+              Configuration
             </Button>
-            <Divider />
             <Stack
               direction="row"
               alignItems="center"
@@ -208,6 +254,11 @@ const Main = () => {
                 updatePluginKey={updatePluginKey}
                 onDelete={deletePlugin}
               />
+            ) : config != null && config.main ? (
+              <MainConfiguration
+                config={config.main}
+                onConfigChange={updateMainConfig}
+              />
             ) : null}
           </div>
           {showJson ? (
@@ -218,7 +269,7 @@ const Main = () => {
             />
           ) : null}
         </Stack>
-      </div>
+      </Stack>
     </>
   );
 };

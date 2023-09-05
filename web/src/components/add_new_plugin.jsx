@@ -5,15 +5,23 @@ import {
   Modal,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import BasicDialog from "./basic_dialog";
 import PluginItem from "./plugin_item";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 
 const AddNewPlugin = (props) => {
   const { open, onClose, availablePlugins, onAddPlugin } = props;
   const [filter, setFilter] = useState("");
+
+  // Reset filter when opening dialog
+  useEffect(() => {
+    if (open) {
+      setFilter("");
+    }
+  }, [open]);
 
   const filteredPlugins = useMemo(() => {
     if (!availablePlugins) {
@@ -41,7 +49,7 @@ const AddNewPlugin = (props) => {
           justifyContent="space-between"
           alignItems="center"
         >
-          Available plugins
+          <Typography variant="h5">Available plugins</Typography>
           <TextField
             label="Search"
             value={filter}
