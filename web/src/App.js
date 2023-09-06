@@ -2,6 +2,7 @@ import "./App.css";
 import { ThemeProvider, createTheme } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Main from "./components/main";
+import Welcome from "./components/welcome";
 
 function App() {
   const primary = {
@@ -21,7 +22,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme={true}></CssBaseline>
-      <Main />
+      <Welcome />
     </ThemeProvider>
   );
 }
