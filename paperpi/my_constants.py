@@ -42,7 +42,7 @@ REQ_PLUGIN_KEYS = {
   "name": {
     "description": "Human readable plugin identifier",
     "value": ""
-  }
+  },
   "layout": {
     "description": "Layout to use in displaying plugin output",
     "value": "layout"
