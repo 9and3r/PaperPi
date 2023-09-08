@@ -35,7 +35,9 @@ PLUGINS = 'plugins'
 FONTS = Path(f'{BASE_DIRECTORY}/fonts').resolve()
 
 
-# configuration expected sections
+# configuration expected sections - only these will be processed
+CONFIG_SECTIONS = ['config_version', 'main', 'plugins']
+
 
 # required keys that every plugin configuration needs to have
 REQ_PLUGIN_KEYS = {
