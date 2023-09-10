@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from "@mui/material/Button";
 import {
   Card,
+  Collapse,
   Dialog,
   Divider,
   IconButton,
@@ -13,6 +14,8 @@ import {
 } from "@mui/material";
 import PluginConfigurator from "./plugin_configurator";
 import { ReactComponent as Logo } from "../PaperPi.svg";
+import { TransitionGroup } from "react-transition-group";
+
 import {
   getConfig,
   getPluginConfig,
@@ -212,37 +215,40 @@ const Main = () => {
                 <AddIcon />
               </IconButton>
             </Stack>
-            <Stack direction="column" gap={3}>
+            <TransitionGroup>
               {config !== null
                 ? Object.entries(config.plugins).map(([key, item]) => (
-                    <Button
-                      key={key}
-                      style={{ justifyContent: "space-between" }}
-                      variant={
-                        selectedPlugin !== null && selectedPlugin === key
-                          ? "contained"
-                          : "outlined"
-                      }
-                      endIcon={
-                        item.enabled ? null : (
-                          <WarningAmberIcon
-                            color={
-                              selectedPlugin !== null && selectedPlugin === key
-                                ? "inherit"
-                                : "warning"
-                            }
-                          />
-                        )
-                      }
-                      onClick={() => {
-                        setSelectedPlugin(key);
-                      }}
-                    >
-                      {key}
-                    </Button>
+                    <Collapse key={key} sx={{ marginBottom: "1rem" }}>
+                      <Button
+                        key={key}
+                        style={{ justifyContent: "space-between" }}
+                        variant={
+                          selectedPlugin !== null && selectedPlugin === key
+                            ? "contained"
+                            : "outlined"
+                        }
+                        endIcon={
+                          item.enabled ? null : (
+                            <WarningAmberIcon
+                              color={
+                                selectedPlugin !== null &&
+                                selectedPlugin === key
+                                  ? "inherit"
+                                  : "warning"
+                              }
+                            />
+                          )
+                        }
+                        onClick={() => {
+                          setSelectedPlugin(key);
+                        }}
+                      >
+                        {key}
+                      </Button>
+                    </Collapse>
                   ))
                 : null}
-            </Stack>
+            </TransitionGroup>
           </Card>
           <div style={{ flexGrow: 1 }}>
             {selectedPlugin !== null ? (

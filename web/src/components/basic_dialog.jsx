@@ -4,7 +4,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Fade,
+  Slide,
 } from "@mui/material";
+import { forwardRef } from "react";
 
 const BasicDialog = (props) => {
   const {
@@ -19,7 +22,13 @@ const BasicDialog = (props) => {
   } = props;
 
   return (
-    <Dialog open={open} onClose={onClose} scroll="paper">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      scroll="paper"
+      TransitionComponent={Slide}
+      TransitionProps={{ direction: "up" }}
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent dividers={true} sx={{ minWidth: "min(500px, 50vw)" }}>
         {render}

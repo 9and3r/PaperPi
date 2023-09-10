@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dbf722a2-2f37-40ef-8e72-a1aa8dc4438f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/splash_screen/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/splash_screen/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/components/basic_dialog.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/components/basic_dialog.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../web/src/components/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../web/src/components/main.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,22 +17,22 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="2V2CF9hnpd8lxLaM6Zh6oowVzog" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "web-configuration",
-    "last_opened_file_path": "/Users/anderorbegozo/Documents/GitHub/PaperPi/paperpi"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;web-configuration&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/anderorbegozo/Documents/GitHub/PaperPi/paperpi&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="paperpi-dev" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="paperpi" />
