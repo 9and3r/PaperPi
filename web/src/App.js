@@ -24,7 +24,7 @@ function App() {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     let interval = setTimeout(() => {
-      setLoaded(true);
+      //setLoaded(true);
     }, 1500);
     return () => {
       clearInterval(interval);
@@ -48,7 +48,7 @@ function App() {
           <Welcome />
         </div>
       </Slide>
-      <Main />
+      {false ? <Main /> : null}
     </ThemeProvider>
   );
 }
