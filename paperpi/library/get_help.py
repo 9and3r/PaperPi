@@ -124,7 +124,7 @@ def _get_module_docs(module):
 
 
 
-def _get_layouts(module):
+def _get_layouts(module, array_mode=False):
     '''get layout names provided by a plugin
     
     Args:
@@ -139,10 +139,15 @@ def _get_layouts(module):
     except AttributeError:
         my_dir =[f'NO LAYOUTS FOUND IN {module.__name__}']
 
+    layouts = []
     mls.string = 'LAYOUTS AVAILABLE:'
     for item in my_dir:
         if not item.startswith('__') and not item in layout_ignore:
             mls.string = f'  {item}'
+            layouts.append(item)
+
+    if array_mode:
+        return layouts
     return mls.string
 
 
