@@ -16,13 +16,6 @@ const getMainConfigInfo = async () => {
 };
 
 const getPluginConfig = async (plugin) => {
-  try {
-    // Code throwing an exception
-    throw new Error();
-  } catch (e) {
-    console.log(e.stack);
-  }
-  console.log(plugin);
   let response = await fetch(
     ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/info"
   );

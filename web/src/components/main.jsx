@@ -1,12 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Button from "@mui/material/Button";
 import {
   Card,
   Collapse,
-  Dialog,
-  Divider,
   IconButton,
-  Slide,
   Stack,
   ThemeProvider,
   Typography,
@@ -16,12 +13,7 @@ import PluginConfigurator from "./plugin_configurator";
 import { ReactComponent as Logo } from "../PaperPi.svg";
 import { TransitionGroup } from "react-transition-group";
 
-import {
-  getConfig,
-  getPluginConfig,
-  loadPlugins,
-  sendConfig,
-} from "../endpoint_manager";
+import { getPluginConfig, sendConfig } from "../endpoint_manager";
 import AddNewPlugin from "./add_new_plugin";
 import AddIcon from "@mui/icons-material/Add";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -30,11 +22,13 @@ import BasicDialog from "./basic_dialog";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 import MainConfiguration from "./main_configuration";
 
-const Main = () => {
-  const [availablePlugins, setAvailablePlugins] = useState(null);
-  const [selectedPlugin, setSelectedPlugin] = useState(null);
-  const [config, setConfig] = useState(null);
+const Main = (props) => {
+  const { config, availablePlugins, setConfig } = props;
+
+  const [selectedPluginIndex, setSelectedPluginIndex] = useState(null);
+
   const [showApplyChangesDialog, setShowApplyChangesDialog] = useState(false);
+
   const [showJson, setShowJson] = useState(
     localStorage.getItem("showJson") === "true"
   );
@@ -47,38 +41,25 @@ const Main = () => {
 
   const [newPluginDialogOpen, setNewPluginDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const initialLoad = async () => {
-      setAvailablePlugins(await loadPlugins());
-      setConfig(await getConfig());
-    };
-    initialLoad();
-  }, []);
-
-  console.log(showJson);
-
   const onAddPlugin = async (item) => {
     let newConfig = { ...config };
     // Find available name
-    let num = 0;
     let humanName = item
       .replace("_", " ")
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
     let name = humanName;
-    while (name in newConfig.plugins) {
-      num++;
-      name = humanName + " " + num;
-    }
     let pluginConfig = await getPluginConfig(item);
-    newConfig.plugins[name] = {};
+    let newPluginConfig = {};
     Object.entries(pluginConfig.config).forEach(([key, item]) => {
-      newConfig.plugins[name][key] = item.value;
+      newPluginConfig[key] = item.value;
     });
+    newPluginConfig.name = name;
+    newConfig.plugins.push(newPluginConfig);
     setConfig(newConfig);
     setNewPluginDialogOpen(false);
-    setSelectedPlugin(name);
+    setSelectedPluginIndex(newConfig.plugins.length - 1);
   };
 
   const updatePluginConfig = (plugin, newPluginConfig) => {
@@ -93,23 +74,12 @@ const Main = () => {
     setConfig(newConfig);
   };
 
-  const updatePluginKey = (oldKey, newKey) => {
-    let newConfig = { ...config };
-    newConfig.plugins[newKey] = newConfig.plugins[oldKey];
-    delete newConfig.plugins[oldKey];
-    setConfig(newConfig);
-    if (selectedPlugin === oldKey) {
-      setSelectedPlugin(newKey);
-    }
-  };
-
   const deletePlugin = (key) => {
     let newConfig = { ...config };
     delete newConfig.plugins[key];
     setConfig(newConfig);
-    if (selectedPlugin === key) {
-      setSelectedPlugin(null);
-    }
+
+    setSelectedPluginIndex(null);
   };
 
   return (
@@ -195,8 +165,8 @@ const Main = () => {
             <h3>Main</h3>
             <Button
               sx={{ width: "100%", justifyContent: "space-between" }}
-              onClick={() => setSelectedPlugin(null)}
-              variant={selectedPlugin === null ? "contained" : "outlined"}
+              onClick={() => setSelectedPluginIndex(null)}
+              variant={selectedPluginIndex === null ? "contained" : "outlined"}
             >
               Configuration
             </Button>
@@ -217,13 +187,16 @@ const Main = () => {
             </Stack>
             <TransitionGroup>
               {config !== null
-                ? Object.entries(config.plugins).map(([key, item]) => (
-                    <Collapse key={key} sx={{ marginBottom: "1rem" }}>
+                ? config.plugins.map((item, index) => (
+                    <Collapse key={index} sx={{ marginBottom: "1rem" }}>
                       <Button
-                        key={key}
-                        style={{ justifyContent: "space-between" }}
+                        style={{
+                          width: "100%",
+                          justifyContent: "space-between",
+                        }}
                         variant={
-                          selectedPlugin !== null && selectedPlugin === key
+                          selectedPluginIndex !== null &&
+                          selectedPluginIndex === index
                             ? "contained"
                             : "outlined"
                         }
@@ -231,8 +204,8 @@ const Main = () => {
                           item.enabled ? null : (
                             <WarningAmberIcon
                               color={
-                                selectedPlugin !== null &&
-                                selectedPlugin === key
+                                selectedPluginIndex !== null &&
+                                selectedPluginIndex === index
                                   ? "inherit"
                                   : "warning"
                               }
@@ -240,10 +213,10 @@ const Main = () => {
                           )
                         }
                         onClick={() => {
-                          setSelectedPlugin(key);
+                          setSelectedPluginIndex(index);
                         }}
                       >
-                        {key}
+                        {item.name}
                       </Button>
                     </Collapse>
                   ))
@@ -251,13 +224,11 @@ const Main = () => {
             </TransitionGroup>
           </Card>
           <div style={{ flexGrow: 1 }}>
-            {selectedPlugin !== null ? (
+            {selectedPluginIndex !== null ? (
               <PluginConfigurator
-                pluginKey={selectedPlugin}
-                plugin={config.plugins[selectedPlugin]}
-                pluginKeys={Object.keys(config.plugins)}
+                index={selectedPluginIndex}
+                plugin={config.plugins[selectedPluginIndex]}
                 updatePluginConfig={updatePluginConfig}
-                updatePluginKey={updatePluginKey}
                 onDelete={deletePlugin}
               />
             ) : config != null && config.main ? (

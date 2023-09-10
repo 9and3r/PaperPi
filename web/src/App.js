@@ -1,10 +1,10 @@
 import "./App.css";
-import { Fade, Slide, ThemeProvider, createTheme } from "@mui/material";
+import { Slide, ThemeProvider, createTheme } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Main from "./components/main";
 import Welcome from "./components/welcome";
 import { useEffect, useState } from "react";
-import zIndex from "@mui/material/styles/zIndex";
+import { getConfig, loadPlugins } from "./endpoint_manager";
 
 function App() {
   const primary = {
@@ -17,24 +17,44 @@ function App() {
   const theme = createTheme({
     palette: {
       mode: "dark",
-      //primary: primary,
+      primary: primary,
     },
   });
 
+  const [config, setConfig] = useState(null);
+  const [availablePlugins, setAvailablePlugins] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(null);
+
+  const MIN_LOAD_TIME_MS = 700;
+
   useEffect(() => {
-    let interval = setTimeout(() => {
-      //setLoaded(true);
-    }, 1500);
-    return () => {
-      clearInterval(interval);
+    const initialLoad = async () => {
+      try {
+        const startTime = new Date().getTime();
+        setAvailablePlugins(await loadPlugins());
+        setConfig(await getConfig());
+        const loadTime = new Date().getTime() - startTime;
+        if (loadTime > MIN_LOAD_TIME_MS) {
+          setLoaded(true);
+        } else {
+          await new Promise((resolve) =>
+            setTimeout(resolve, MIN_LOAD_TIME_MS - loadTime)
+          );
+          setLoaded(true);
+        }
+      } catch (error) {
+        console.log(error);
+        setError(error);
+      }
     };
+    initialLoad();
   }, []);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme={true}></CssBaseline>
-      <Slide in={!loaded} direction="left" appear={false}>
+      <Slide in={!loaded} direction="right" appear={false} unmountOnExit>
         <div
           style={{
             position: "absolute",
@@ -45,10 +65,16 @@ function App() {
             right: 0,
           }}
         >
-          <Welcome />
+          <Welcome loading={loaded} error={error} />
         </div>
       </Slide>
-      {false ? <Main /> : null}
+      {loaded ? (
+        <Main
+          config={config}
+          availablePlugins={availablePlugins}
+          setConfig={setConfig}
+        />
+      ) : null}
     </ThemeProvider>
   );
 }

@@ -1,38 +1,27 @@
 import {
-  Box,
   Button,
   Card,
   CircularProgress,
   Dialog,
   Divider,
-  IconButton,
   Stack,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getPluginConfig, testPlugin } from "../endpoint_manager";
-import EditIcon from "@mui/icons-material/Edit";
-import ChangePluginName from "./change_plugin_name";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BasicDialog from "./basic_dialog";
 import DynamicOption from "./dynamic_option";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const PluginConfigurator = (props) => {
-  const {
-    plugin,
-    pluginKey,
-    updatePluginConfig,
-    pluginKeys,
-    updatePluginKey,
-    onDelete,
-  } = props;
+  const { plugin, index, updatePluginConfig, onDelete } = props;
 
   const [pluginConfig, setPluginConfig] = useState(null);
   const [orderedOptions, setOrderedOptions] = useState([]);
-  const [nameEditDialogOpen, setNameEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [image, setImage] = useState(null);
 
+  const name = plugin ? plugin.name : "";
   const pluginName = plugin ? plugin.plugin : null;
 
   useEffect(() => {
@@ -59,7 +48,7 @@ const PluginConfigurator = (props) => {
   const setNewValue = (key, value) => {
     let newConfig = { ...plugin };
     newConfig[key] = value;
-    updatePluginConfig(pluginKey, newConfig);
+    updatePluginConfig(index, newConfig);
   };
 
   return (
@@ -69,23 +58,11 @@ const PluginConfigurator = (props) => {
         onClose={() => {
           setDeleteDialogOpen(false);
         }}
-        title={"Delete " + pluginKey}
-        render={"Do you want to delete " + pluginKey + "?"}
+        title={"Delete " + name}
+        render={"Do you want to delete " + name + "?"}
         acceptButtonLabel="Delete"
         onAccept={() => {
-          onDelete(pluginKey);
-        }}
-      />
-      <ChangePluginName
-        open={nameEditDialogOpen}
-        onClose={() => {
-          setNameEditDialogOpen(false);
-        }}
-        names={pluginKeys}
-        initialName={pluginKey}
-        onNameChange={(oldKey, newKey) => {
-          setNameEditDialogOpen(false);
-          updatePluginKey(oldKey, newKey);
+          onDelete(index);
         }}
       />
 
@@ -101,19 +78,10 @@ const PluginConfigurator = (props) => {
           alignItems="center"
           justifyContent="space-between"
         >
-          <Stack direction="row" gap={1} alignItems="center">
-            <h2>
-              {pluginKey}
-              {}
-            </h2>
-            <IconButton
-              onClick={() => {
-                setNameEditDialogOpen(true);
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-          </Stack>
+          <h2>
+            {name}
+            {}
+          </h2>
 
           <Button
             variant="outlined"
