@@ -35,24 +35,16 @@ def config():
     elif request.method == "POST":
         newConfig = request.json
         # TODO SAVE THE NEW CONFIG. COMPARE AND RELOAD REQUIRED PLUGINS
+        with open(constants.CONFIG_USER, "w") as config_file:
+            config_file.write(json.dumps(newConfig))
         print("Testing. NewConfig received")
         print(newConfig)
         return sendResponse(jsonify(newConfig))
 
-    #config = {'main': {}, 'plugins': {}}
-    global config
-    currentConfig = copy.deepcopy(config)
-    plugins = []
-    for plugin in currentConfig['plugins']:
-        currentConfig['plugins'] = plugin
-        try:
-            imported = importlib.import_module(plugin['plugin'])
-            if 'configurable' not in imported.constants.json_config or imported.constants.json_config['configurable']:
-                plugins.append(plugin)
-        except:
-            plugins.append(plugin)
-    currentConfig['plugins'] = plugins
-    return sendResponse(jsonify(currentConfig))
+    with open(constants.CONFIG_USER) as config_file:
+        file_contents = config_file.read()
+    loaded_config = json.loads(file_contents)
+    return sendResponse(jsonify(loaded_config))
 
 
 @app.route('/endpoints/plugins/<plugin>/test', methods=['POST', 'OPTIONS'])
