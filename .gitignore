@@ -15,3 +15,5 @@ paperpi/plugins/*/library
 Untitled.ipynb
 *.DS_Store
 *.pyc
+paperpi/.idea/
+*__ignore__*
