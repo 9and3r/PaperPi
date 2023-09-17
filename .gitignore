@@ -13,3 +13,7 @@ tmp/*
 version.txt
 paperpi/plugins/*/library
 Untitled.ipynb
+*.DS_Store
+paperpi/.idea
+*.pyc
+*__ignore__*
