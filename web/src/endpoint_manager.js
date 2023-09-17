@@ -34,18 +34,15 @@ const sendConfig = async (config) => {
   return await response.json();
 };
 
-const testPlugin = async (plugin, config) => {
-  let response = await fetch(
-    ENDPOINTS_HOST + "/endpoints/plugins/" + plugin + "/test",
-    {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify(config),
-    }
-  );
+const testPlugin = async (config) => {
+  let response = await fetch(ENDPOINTS_HOST + "/endpoints/plugins/test", {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify(config),
+  });
   return URL.createObjectURL(await response.blob());
 };
 

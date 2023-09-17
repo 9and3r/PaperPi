@@ -12,7 +12,7 @@ const PluginPreview = (props) => {
   useEffect(() => {
     const loadImage = async () => {
       setImage(null);
-      setImage(await testPlugin(plugin.plugin, plugin));
+      setImage(await testPlugin(plugin));
     };
 
     if (plugin !== null) {

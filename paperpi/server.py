@@ -13,8 +13,7 @@ import traceback
 
 from epdlib import Screen
 
-import paperpi
-
+from configuration import configure_plugin
 from library.Plugin import Plugin
 
 app = Flask(__name__, static_url_path="", static_folder="web_static", template_folder="web_static")
@@ -51,14 +50,13 @@ def config():
     return sendResponse(jsonify(loaded_config))
 
 
-@app.route('/endpoints/plugins/<plugin>/test', methods=['POST', 'OPTIONS'])
-def testPlugin(plugin):
+@app.route('/endpoints/plugins/test', methods=['POST', 'OPTIONS'])
+def testPlugin():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
-    print("Loading pluing: " + plugin)
     try:
         config = request.json
-        image = setupPlugin(plugin, config)
+        image = setupPlugin(config)
     except:
         traceback.print_exc()
     return serveImage(image)
@@ -185,9 +183,9 @@ def _corsify_actual_response(response):
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
-def setupPlugin(key, values):
+def setupPlugin(values):
     global config
     cache = CacheFiles(path_prefix=constants.APP_NAME)
     config['main']['plugin_timeout'] = 0
-    plugin = paperpi.configure_plugin(config['main'], values, (800, 400), cache)
+    plugin = configure_plugin(config['main'], values, (800, 400), cache)
     return plugin.image
