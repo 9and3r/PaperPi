@@ -12,6 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BasicDialog from "./basic_dialog";
 import DynamicOption from "./dynamic_option";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import PreviewDialog from "./preview_dialog";
 
 const PluginConfigurator = (props) => {
   const { plugin, index, updatePluginConfig, onDelete } = props;
@@ -19,7 +20,7 @@ const PluginConfigurator = (props) => {
   const [pluginConfig, setPluginConfig] = useState(null);
   const [orderedOptions, setOrderedOptions] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [image, setImage] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const name = plugin ? plugin.name : "";
   const pluginName = plugin ? plugin.plugin : null;
@@ -87,8 +88,7 @@ const PluginConfigurator = (props) => {
             variant="outlined"
             endIcon={<VisibilityIcon />}
             onClick={async () => {
-              setImage(-1);
-              setImage(await testPlugin(plugin.plugin, plugin));
+              setShowPreview(true);
             }}
           >
             Preview
@@ -124,22 +124,11 @@ const PluginConfigurator = (props) => {
           </Button>
         </Stack>
       </Card>
-      {image ? (
-        <Dialog open={true} onClose={() => setImage(null)}>
-          <Card>
-            <Stack gap={2} sx={{ margin: "2rem", marginBottom: "1rem" }}>
-              {image === -1 ? (
-                <CircularProgress />
-              ) : (
-                <>
-                  <img src={image} alt="Preview" />{" "}
-                  <Button onClick={() => setImage(null)}>Close preview</Button>
-                </>
-              )}
-            </Stack>
-          </Card>
-        </Dialog>
-      ) : null}
+      <PreviewDialog
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        plugin={plugin}
+      />
     </>
   );
 };
