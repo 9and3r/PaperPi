@@ -16,9 +16,12 @@ import traceback
 
 from epdlib import Screen
 
+import paperpi
+
 from library.Plugin import Plugin
 
 app = Flask(__name__, static_url_path="", static_folder="web", template_folder="web")
+
 
 logger = logging.getLogger(__name__)
 config = None
@@ -187,56 +190,7 @@ def _corsify_actual_response(response):
 
 # Has been copied. Should be improved in the future to reuse code
 def setupPlugin(key, values):
-    def font_path(layout):
-        '''add font path to layout'''
-        for k, block in layout.items():
-            font = block.get('font', None)
-            if font:
-                font = font.format(constants.FONTS)
-                block['font'] = font
-        return layout
-
+    global config
     cache = CacheFiles(path_prefix=constants.APP_NAME)
-    plugin_config = {}
-    # populate the kwargs plugin_config dict that will be passed to the Plugin() object
-    plugin_config['name'] = key
-    plugin_config['resolution'] = (800, 600)
-    plugin_config['config'] = values
-    plugin_config['cache'] = cache
-    plugin_config['force_onebit'] = False  # config['main']['force_onebit']
-    plugin_config['screen_mode'] = 'RGB'  # config['main']['screen_mode']
-    plugin_config['plugin_timeout'] = 35
-    # force layout to one-bit mode for non-HD screens
-    #             if not config['main'].get('display_type') == 'HD':
-    #                 plugin_config['force_onebit'] = True
-
-    logging.debug(f'plugin_config: {plugin_config}')
-
-    try:
-        module = import_module(f'{constants.PLUGINS}.{values["plugin"]}')
-        plugin_config['update_function'] = module.update_function
-        layout = getattr(module.layout, values['layout'])
-        layout = font_path(layout)
-        plugin_config['layout'] = layout
-    except KeyError as e:
-        logger.info('no module specified; skipping update_function and layout')
-    except ModuleNotFoundError as e:
-        logger.warning(f'error: {e} while loading module {constants.PLUGINS}.{values["plugin"]}')
-        logger.warning(f'skipping plugin')
-
-    except AttributeError as e:
-        logger.warning(f'could not find layout "{plugin_config["layout"]}" in {plugin_config["name"]}')
-        logger.warning(f'skipping plugin')
-
-    my_plugin = Plugin(**plugin_config)
-    try:
-        my_plugin.update(use_signal=False)
-    except AttributeError as e:
-        logger.warning(f'ignoring plugin {my_plugin.name} due to missing update_function')
-        logger.warning(f'plugin threw error: {e}')
-
-    logger.info(f'appending plugin {my_plugin.name}')
-
-    my_plugin.update()
-    print("Getting image")
-    return my_plugin.image
+    plugin = paperpi.configure_plugin(config['main'], values, (800, 400), cache, use_signal=False)
+    return plugin.image

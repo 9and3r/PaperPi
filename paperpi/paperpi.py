@@ -661,7 +661,7 @@ def clean_up(cache=None, screen=None, no_wipe=False):
 
 
 
-def configure_plugin(main, config, resolution, cache):
+def configure_plugin(main, config, resolution, cache, use_signal=True):
     '''configure a single plugin
     
         Args:
@@ -757,7 +757,7 @@ def configure_plugin(main, config, resolution, cache):
     
     try:
         logging.debug('updating plugin')
-        my_plugin.update()
+        my_plugin.update(use_signal=use_signal)
     except (AttributeError, TypeError) as e:
         msg = f'ignoring plugin "{plugin_config["name"]}" due to errors: {e}'
         logger.warning(msg)
