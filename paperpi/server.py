@@ -57,7 +57,8 @@ def testPlugin(plugin):
         return _build_cors_preflight_response()
     print("Loading pluing: " + plugin)
     try:
-        image = setupPlugin(plugin, request.json)
+        config = request.json
+        image = setupPlugin(plugin, config)
     except:
         traceback.print_exc()
     return serveImage(image)
@@ -187,5 +188,6 @@ def _corsify_actual_response(response):
 def setupPlugin(key, values):
     global config
     cache = CacheFiles(path_prefix=constants.APP_NAME)
-    plugin = paperpi.configure_plugin(config['main'], values, (800, 400), cache, use_signal=False)
+    config['main']['plugin_timeout'] = 0
+    plugin = paperpi.configure_plugin(config['main'], values, (800, 400), cache)
     return plugin.image

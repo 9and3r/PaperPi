@@ -757,7 +757,7 @@ def configure_plugin(main, config, resolution, cache, use_signal=True):
     
     try:
         logging.debug('updating plugin')
-        my_plugin.update(use_signal=use_signal)
+        my_plugin.update()
     except (AttributeError, TypeError) as e:
         msg = f'ignoring plugin "{plugin_config["name"]}" due to errors: {e}'
         logger.warning(msg)
