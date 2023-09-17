@@ -23,7 +23,7 @@ from configparser import Error as ConfigParserError
 import jsonmerge
 from dictor import dictor
 from jsonpath_ng import jsonpath, parse
-
+from server import startServer
 
 
 
@@ -1073,6 +1073,8 @@ def main():
             logging.critical(f'Could not write to EPD: {e}')
             
     cache = CacheFiles(path_prefix=constants.APP_NAME)
+
+    startServer(config)
     
     
     # get a list of all the plugins
