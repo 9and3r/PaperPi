@@ -12,7 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BasicDialog from "./basic_dialog";
 import DynamicOption from "./dynamic_option";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import PreviewDialog from "./preview_dialog";
+import PluginPreview from "./plugin_preview";
 
 const PluginConfigurator = (props) => {
   const { plugin, index, updatePluginConfig, onDelete } = props;
@@ -83,52 +83,65 @@ const PluginConfigurator = (props) => {
             {name}
             {}
           </h2>
+          {showPreview ? (
+            <Button
+              variant="outlined"
+              endIcon={<VisibilityIcon />}
+              onClick={async () => {
+                setShowPreview(false);
+              }}
+            >
+              {plugin.name + " - Configuration"}
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              endIcon={<VisibilityIcon />}
+              onClick={async () => {
+                setShowPreview(true);
+              }}
+            >
+              Preview
+            </Button>
+          )}
+        </Stack>
 
-          <Button
-            variant="outlined"
-            endIcon={<VisibilityIcon />}
-            onClick={async () => {
-              setShowPreview(true);
-            }}
-          >
-            Preview
-          </Button>
-        </Stack>
-        <Stack gap={3}>
-          {pluginConfig && plugin && pluginConfig.config
-            ? orderedOptions.map(([key, value]) => {
-                return (
-                  <DynamicOption
-                    key={key}
-                    value={plugin[key]}
-                    disabled={key === "plugin"}
-                    option={value}
-                    label={key}
-                    onChange={(newValue) => {
-                      setNewValue(key, newValue);
-                    }}
-                  />
-                );
-              })
-            : null}
-        </Stack>
-        <Divider sx={{ margin: "1rem 0" }} />
-        <Stack direction="row-reverse">
-          <Button
-            variant="outlined"
-            color="error"
-            endIcon={<DeleteIcon />}
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            Delete
-          </Button>
-        </Stack>
+        {showPreview ? (
+          <PluginPreview plugin={plugin} />
+        ) : (
+          <>
+            <Stack gap={3}>
+              {pluginConfig && plugin && pluginConfig.config
+                ? orderedOptions.map(([key, value]) => {
+                    return (
+                      <DynamicOption
+                        key={key}
+                        value={plugin[key]}
+                        disabled={key === "plugin"}
+                        option={value}
+                        label={key}
+                        onChange={(newValue) => {
+                          setNewValue(key, newValue);
+                        }}
+                      />
+                    );
+                  })
+                : null}
+            </Stack>
+            <Divider sx={{ margin: "1rem 0" }} />
+            <Stack direction="row-reverse">
+              <Button
+                variant="outlined"
+                color="error"
+                endIcon={<DeleteIcon />}
+                onClick={() => setDeleteDialogOpen(true)}
+              >
+                Delete
+              </Button>
+            </Stack>
+          </>
+        )}
       </Card>
-      <PreviewDialog
-        open={showPreview}
-        onClose={() => setShowPreview(false)}
-        plugin={plugin}
-      />
     </>
   );
 };
