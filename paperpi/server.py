@@ -1,9 +1,7 @@
 import json
 from flask import Flask, jsonify, make_response, request, send_file, render_template
 from threading import Thread
-from dataclasses_json import dataclass_json
 from io import BytesIO
-from PIL import Image
 from library import get_help
 import my_constants as constants
 from pathlib import Path
@@ -11,7 +9,6 @@ import importlib
 import copy
 import logging
 from library.CacheFiles import CacheFiles
-from importlib import import_module
 import traceback
 
 from epdlib import Screen
@@ -20,7 +17,7 @@ import paperpi
 
 from library.Plugin import Plugin
 
-app = Flask(__name__, static_url_path="", static_folder="web", template_folder="web")
+app = Flask(__name__, static_url_path="", static_folder="web_static", template_folder="web_static")
 
 
 logger = logging.getLogger(__name__)
@@ -187,8 +184,6 @@ def _corsify_actual_response(response):
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
-
-# Has been copied. Should be improved in the future to reuse code
 def setupPlugin(key, values):
     global config
     cache = CacheFiles(path_prefix=constants.APP_NAME)
