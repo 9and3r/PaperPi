@@ -661,7 +661,7 @@ def clean_up(cache=None, screen=None, no_wipe=False):
 
 
 
-def configure_plugin(main, config, resolution, cache, use_signal=True):
+def configure_plugin(main, config, resolution, cache):
     '''configure a single plugin
     
         Args:

@@ -151,7 +151,7 @@ class Plugin:
         raise TimeOutException(f'Plugin "{self.name}" update function timed-out after a max of {self.plugin_timeout} seconds')
     
     
-    def update(self, force=False, use_signal = True, *args, **kwargs):
+    def update(self, force=False, *args, **kwargs):
         '''request an update of the plugin data
             requests are throttled if they occur sooner than the cool-down period
             defined by self.refresh_rate
