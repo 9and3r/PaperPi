@@ -978,7 +978,7 @@ def custom_ander_paint(image):
     font = ImageFont.truetype("Arial", 60)
 
     now = datetime.now()
-    drawer.text((90, 30), now.strftime("%H:%M"), font=font)
+    drawer.text((90, 30), now.strftime("%H:%M"), font=font, stroke_fill=1, stroke_width=2)
     return image
 
 
