@@ -70,7 +70,12 @@ json_config = {
   },
   "lat": {
     "description": "Latitude of location",
-    "value": 9.000,
+    "value": 52.36,
+    "type": "float"
+  },
+    "lon": {
+    "description": "Longitude of location",
+    "value": 4.90,
     "type": "float"
   },
   "email": {

@@ -119,7 +119,7 @@ def pluginConfigInfo(plugin):
         return _build_cors_preflight_response()
     imported = importlib.import_module(plugin)
     config = copy.deepcopy(imported.constants.json_config)
-    layouts = get_help._get_layouts(imported, array_mode=True)
+    layouts = get_help._get_layouts(imported, as_string=False)
 
     # Add default system keys
     for key in constants.REQ_PLUGIN_KEYS:
