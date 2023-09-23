@@ -100,7 +100,7 @@ def mainConfigInfo():
     file.close()
     # Load screen types
     try:
-        screens = list_compatible_modules
+        screens = list_compatible_modules()
         screen_names = []
         for screen in screens:
             if screen['supported']:
