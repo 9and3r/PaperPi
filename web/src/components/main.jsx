@@ -68,15 +68,15 @@ const Main = (props) => {
     setConfig(newConfig);
   };
 
-  const updateMainConfig = (key, value) => {
+  const updateMainConfig = (index, value) => {
     let newConfig = { ...config };
-    newConfig.main[key] = value;
+    newConfig.main[index] = value;
     setConfig(newConfig);
   };
 
-  const deletePlugin = (key) => {
+  const deletePlugin = (index) => {
     let newConfig = { ...config };
-    delete newConfig.plugins[key];
+    newConfig.plugins.splice(index, 1);
     setConfig(newConfig);
 
     setSelectedPluginIndex(null);

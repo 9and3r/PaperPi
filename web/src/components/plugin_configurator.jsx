@@ -5,6 +5,8 @@ import {
   Dialog,
   Divider,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getPluginConfig, testPlugin } from "../endpoint_manager";
@@ -13,6 +15,7 @@ import BasicDialog from "./basic_dialog";
 import DynamicOption from "./dynamic_option";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import PluginPreview from "./plugin_preview";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const PluginConfigurator = (props) => {
   const { plugin, index, updatePluginConfig, onDelete } = props;
@@ -83,27 +86,23 @@ const PluginConfigurator = (props) => {
             {name}
             {}
           </h2>
-          {showPreview ? (
-            <Button
-              variant="outlined"
-              endIcon={<VisibilityIcon />}
-              onClick={async () => {
-                setShowPreview(false);
-              }}
-            >
-              {plugin.name + " - Configuration"}
-            </Button>
-          ) : (
-            <Button
-              variant="outlined"
-              endIcon={<VisibilityIcon />}
-              onClick={async () => {
-                setShowPreview(true);
-              }}
-            >
+
+          <ToggleButtonGroup
+            color="primary"
+            value={showPreview ? "preview" : "config"}
+            exclusive
+            onChange={() => setShowPreview(!showPreview)}
+            aria-label="Platform"
+          >
+            <ToggleButton value="config">
+              Configuration
+              <SettingsIcon sx={{ marginLeft: "0.4rem" }} />
+            </ToggleButton>
+            <ToggleButton value="preview">
               Preview
-            </Button>
-          )}
+              <VisibilityIcon sx={{ marginLeft: "0.4rem" }} />
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Stack>
 
         {showPreview ? (

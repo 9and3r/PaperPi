@@ -14,7 +14,6 @@ import traceback
 from epdlib import Screen
 
 from configuration import configure_plugin
-from library.Plugin import Plugin
 
 app = Flask(__name__, static_url_path="", static_folder="web_static", template_folder="web_static")
 
@@ -87,7 +86,7 @@ def plugins():
             if 'configurable' not in imported.constants.json_config or imported.constants.json_config['configurable']:
                 result['loaded'].append({'name': pluginName, 'version': imported.constants.version})
         except:
-            result['error'].append({'name': pluginName})
+            result['error'].append({'name': pluginName, 'error': ''.join(traceback.format_stack())})
     return sendResponse(jsonify(result))
 
 
@@ -107,6 +106,7 @@ def mainConfigInfo():
         data['main']['display_type']['choice'] = screen_names
     except:
         # If we are not on Raspberry Pi show fake display list
+        traceback.print_exc()
         data['main']['display_type']['choice'] = ['pygame']
     return sendResponse(jsonify(data))
 
@@ -186,6 +186,12 @@ def _corsify_actual_response(response):
 def setupPlugin(values):
     global config
     cache = CacheFiles(path_prefix=constants.APP_NAME)
-    config['main']['plugin_timeout'] = 0
-    plugin = configure_plugin(config['main'], values, (800, 400), cache)
+    main_config = {
+        'plugin_timeout': 0,
+        'screen_mode': config['main']['screen_mode']
+    }
+    if 'force_onebit' in config['main']:
+        main_config['force_onebit'] = config['main']['force_onebit']
+
+    plugin = configure_plugin(main_config, values, (800, 400), cache)
     return plugin.image
