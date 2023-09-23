@@ -348,6 +348,11 @@ def update_function(self, *args, **kwargs):
     logging.debug(f'using frame: {config_frame}')
     
     image = _add_border(current_image, frame)
+
+    # Resize image if is horizontal
+    if image.size[0] > image.size[1]:
+        image = resizeImage(image, self.resolution[0], self.resolution[1])
+
     
     data = {
         'image': image,
@@ -371,7 +376,29 @@ def update_function(self, *args, **kwargs):
 
 
 
+def resizeImage(input_image, desired_width, desired_height):
+    # Calculate the resizing dimensions while maintaining aspect ratio
+    width, height = input_image.size
+    aspect_ratio = width / height
 
+    if width >= height:
+        new_width = desired_width
+        new_height = int(new_width / aspect_ratio)
+    else:
+        new_height = desired_height
+        new_width = int(new_height * aspect_ratio)
+
+    # Resize the image using Pillow
+    resized_image = input_image.resize((new_width, new_height))
+
+    # Calculate the cropping box to center the image
+    left = (new_width - desired_width) / 2
+    top = (new_height - desired_height) / 2
+    right = (new_width + desired_width) / 2
+    bottom = (new_height + desired_height) / 2
+
+    # Crop the image to the desired resolution
+    return resized_image.crop((left, top, right, bottom))
 
 
 
