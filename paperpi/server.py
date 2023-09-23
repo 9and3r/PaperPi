@@ -104,7 +104,7 @@ def mainConfigInfo():
         screen_names = []
         for screen in screens:
             if screen['supported']:
-                screen_names.append(screen.name)
+                screen_names.append(screen['name'])
         data['main']['display_type']['choice'] = screen_names
     except:
         # If we are not on Raspberry Pi show fake display list
