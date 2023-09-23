@@ -951,7 +951,7 @@ def update_loop(plugins, screen, max_refresh=5):
                 screen.clearEPD()
                 
             try:
-                screen.writeEPD(current_plugin.image)
+                screen.writeEPD(custom_ander_paint(current_plugin.image))
             except FileNotFoundError as e:
                 msg = 'SPI does not appear to be enabled. Paperpi requires SPI access'
                 logging.critical(msg)
@@ -971,9 +971,15 @@ def update_loop(plugins, screen, max_refresh=5):
         
     
     
+from PIL import ImageDraw, ImageFont
+from datetime import datetime
+def custom_ander_paint(image):
+    drawer = ImageDraw.Draw(image)
+    font = ImageFont.truetype("Arial", 60)
 
-
-
+    now = datetime.now()
+    drawer.text((30, 30), now.strftime("%H:%M"), font=font)
+    return image
 
 
 

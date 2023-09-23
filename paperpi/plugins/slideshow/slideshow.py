@@ -21,7 +21,7 @@ from pathlib import Path
 from os import listdir
 from random import randint, choice
 import pickle
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ExifTags
 
 
 
@@ -111,16 +111,22 @@ def _add_border(image, borders=constants.f_white_mat_silver_black):
     logging.debug(f'adding borders: {borders}')
         
     try:
-        im = Image.open(image)
+        image = Image.open(image)
 
-        if not borders:
-            return im
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == 'Orientation':
+                break
 
-        im_new = im.copy()
-        for i in borders:
-            border = round(min(im.size) * i[0])
-            fill = i[1]
-            im_new = ImageOps.expand(im_new, border=border, fill=fill)
+        exif = image._getexif()
+
+        if exif[orientation] == 3:
+            image = image.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            image = image.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            image = image.rotate(90, expand=True)
+
+        return image
     except Exception as e:
         logging.warning(f'failed to open {image} with error: {e}')
         im_new = None
