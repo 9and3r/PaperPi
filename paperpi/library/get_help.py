@@ -124,16 +124,18 @@ def _get_module_docs(module):
 
 
 
-def _get_layouts(module):
+def _get_layouts(module, as_string=True):
     '''get layout names provided by a plugin
     
     Args:
         module: python module
+        as_string(bool): True: return a string of layouts, False: return a list
         
     Returns:
         string containing layout names'''
     layout_ignore = ['os', 'dir_path']
     mls = _multi_line_string()
+    layout_list = []
     try:
         my_dir = dir(getattr(module, 'layout'))
     except AttributeError:
@@ -143,7 +145,12 @@ def _get_layouts(module):
     for item in my_dir:
         if not item.startswith('__') and not item in layout_ignore:
             mls.string = f'  {item}'
-    return mls.string
+            layout_list.append(item)
+            
+    if as_string:
+        return mls.string
+    else:
+        return layout_list
 
 
 
