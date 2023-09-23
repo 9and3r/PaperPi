@@ -11,7 +11,7 @@ import logging
 from library.CacheFiles import CacheFiles
 import traceback
 
-from epdlib import Screen
+from epdlib.Screen import list_compatible_modules
 
 from configuration import configure_plugin
 
@@ -100,10 +100,11 @@ def mainConfigInfo():
     file.close()
     # Load screen types
     try:
-        screens = Screen.list_compatible()
+        screens = list_compatible_modules
         screen_names = []
         for screen in screens:
-            screen_names.append(screen.name)
+            if screen['supported']:
+                screen_names.append(screen.name)
         data['main']['display_type']['choice'] = screen_names
     except:
         # If we are not on Raspberry Pi show fake display list
