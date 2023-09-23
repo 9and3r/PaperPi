@@ -87,6 +87,7 @@ def plugins():
                 result['loaded'].append({'name': pluginName, 'version': imported.constants.version})
         except:
             result['error'].append({'name': pluginName, 'error': ''.join(traceback.format_stack())})
+            traceback.print_stack()
     return sendResponse(jsonify(result))
 
 
@@ -99,7 +100,7 @@ def mainConfigInfo():
     file.close()
     # Load screen types
     try:
-        screens = Screen().list_compatible()
+        screens = Screen.list_compatible()
         screen_names = []
         for screen in screens:
             screen_names.append(screen.name)
