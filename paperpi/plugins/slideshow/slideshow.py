@@ -23,10 +23,6 @@ from random import randint, choice
 import pickle
 from PIL import Image, ImageOps, ExifTags
 
-from pi_heif import register_heif_opener
-print("Registering heif")
-register_heif_opener()
-
 try:
     from pi_heif import register_heif_opener
     print("Registering heif")
@@ -119,6 +115,7 @@ def _add_border(image, borders=constants.f_white_mat_silver_black):
     logging.debug(f'adding borders: {borders}')
         
     try:
+        logging.debug("Image" + image)
         image = Image.open(image)
 
         for orientation in ExifTags.TAGS.keys():
