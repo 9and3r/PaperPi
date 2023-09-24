@@ -22,14 +22,12 @@ from os import listdir
 from random import randint, choice
 import pickle
 from PIL import Image, ImageOps, ExifTags
-from pillow_heif import register_heif_opener
-
-register_heif_opener()
-
-
-
-
-
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except:
+    from pi_heif import register_heif_opener
+    register_heif_opener()
 
 from PIL import UnidentifiedImageError
 
