@@ -115,27 +115,28 @@ def _add_border(image, borders=constants.f_white_mat_silver_black):
     logging.debug(f'adding borders: {borders}')
         
     try:
-        logging.debug("Image" + image)
+        logging.debug("Image" + image.name)
         image = Image.open(image)
 
+        orientation_found = False
         for orientation in ExifTags.TAGS.keys():
             if ExifTags.TAGS[orientation] == 'Orientation':
+                orientation_found = True
                 break
 
-        exif = image._getexif()
+        if orientation_found:
+            exif = image._getexif()
 
-        if exif[orientation] == 3:
-            image = image.rotate(180, expand=True)
-        elif exif[orientation] == 6:
-            image = image.rotate(270, expand=True)
-        elif exif[orientation] == 8:
-            image = image.rotate(90, expand=True)
-
-        return image
+            if exif[orientation] == 3:
+                image = image.rotate(180, expand=True)
+            elif exif[orientation] == 6:
+                image = image.rotate(270, expand=True)
+            elif exif[orientation] == 8:
+                image = image.rotate(90, expand=True)
     except Exception as e:
         logging.warning(f'failed to open {image} with error: {e}')
-        im_new = None
-    return(im_new)    
+        image = None
+    return image
 
 
 
