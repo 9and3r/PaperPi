@@ -27,6 +27,7 @@ try:
     register_heif_opener()
 except:
     from pi_heif import register_heif_opener
+    print("Registering heif")
     register_heif_opener()
 
 from PIL import UnidentifiedImageError
