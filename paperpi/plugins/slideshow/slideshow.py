@@ -356,7 +356,7 @@ def update_function(self, *args, **kwargs):
     image = _add_border(current_image, frame)
 
     # Resize image if is horizontal
-    if image.size[0] > image.size[1]:
+    if image is not None and image.size[0] > image.size[1]:
         image = resizeImage(image, self.resolution[0], self.resolution[1])
 
     

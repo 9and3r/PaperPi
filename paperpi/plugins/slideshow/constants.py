@@ -60,7 +60,7 @@ frame = black & silver: matted
 default_image_path = Path(dir_path+'/fallback_images')
 
 # supported image file types 
-supported_image_types = ['.gif', '.jpg', '.jpeg', '.png']
+supported_image_types = ['.gif', '.jpg', '.jpeg', '.png', '.heic']
 
 # recent images pickle file
 recent_images = 'recent_images.pkl'
