@@ -975,10 +975,10 @@ from PIL import ImageDraw, ImageFont
 from datetime import datetime
 def custom_ander_paint(image):
     drawer = ImageDraw.Draw(image)
-    font = ImageFont.truetype("Arial", 60)
+    font = ImageFont.truetype("Arial", 85)
 
     now = datetime.now()
-    drawer.text((90, 30), now.strftime("%H:%M"), font=font, stroke_fill=1, stroke_width=2)
+    drawer.text((90, 30), now.strftime("%H:%M"), font=font, stroke_fill=1, stroke_width=5)
     return image
 
 
